@@ -1,0 +1,11 @@
+#! /bin/bash
+# -----------------------------------------------------------------------
+# List out packages that have no source in apt
+# 
+# PUPPET CONTROLED: pmodule_server_base
+# -----------------------------------------------------------------------
+
+COLUMNS=400 /usr/bin/dpkg -l | awk '/^ii/ {print $2}' | while read pkg
+do
+  /usr/bin/apt-cache policy $pkg | grep -q -e http:// -e ftp:// || echo $pkg
+done

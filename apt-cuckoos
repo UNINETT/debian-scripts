@@ -1,0 +1,12 @@
+#! /bin/bash
+# -----------------------------------------------------------------------
+# List out packages that have unoriginal source in apt
+# 
+# PUPPET CONTROLED: pmodule_server_base
+# -----------------------------------------------------------------------
+
+COLUMNS=400 /usr/bin/dpkg -l | awk '/^ii/ {print $2}' | while read pkg
+do
+  /usr/bin/apt-cache policy $pkg |
+	grep -A1 '^ \*\*\*' | grep -q '100 /var/lib/dpkg/status' && echo $pkg
+done

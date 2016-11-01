@@ -1,0 +1,54 @@
+#! /bin/bash
+# -----------------------------------------------------------------------
+# Interactively clean out *.dpkg*-filer in /etc
+# 
+# PUPPET CONTROLED: pmodule_server_base
+# -----------------------------------------------------------------------
+
+OLDIES=($(find /etc -name '*.dpkg-old' -o -name '*.dpkg-obsolete' -o -name '*.dpkg-remove' -o -name '*.dpkg-tmp'))
+if test -n "${OLDIES[0]}" ; then
+   echo "Old files:"
+   ls -l ${OLDIES[@]}
+   echo -n "Delete all old files? [Y/I/n]: "
+   read svar ; svar=${svar:-Y} 
+   case $svar in
+      y|Y) rm ${OLDIES[@]} ;;
+      i|I) rm -i ${OLDIES[@]} ;;
+      *) echo "Skipped" ;;
+   esac
+fi
+
+NEWIES=($(find /etc -name '*.dpkg-dist' -o -name '*.dpkg-new' -o -name '*.dpkg-bak'))
+if test -n "${NEWIES[0]}" ; then
+   echo "New files:"
+   ls -l ${NEWIES[@]} ${NEWIES[@]%.dpkg-*}
+   echo -n "Replace all old files with newer and delete old? [Y/I/n]: "
+   read svar ; svar=${svar:-Y} 
+   case $svar in
+      y|Y) OPT="" ;;
+      i|I) OPT="-i" ;;
+      *) OPT="exit" ;;
+   esac
+   if test "${OPT}" != "exit" ; then
+      for file in ${NEWIES[@]} ; do
+         ls -l "${file}"
+         if test -f "${file%.dpkg-*}" ; then
+            ls -l "${file%.dpkg-*}"
+            if test $(stat --printf="%Y" "${file%.dpkg-*}") -lt $(stat --printf="%Y" "${file}") ; then
+               mv -v ${OPT} "${file}" "${file%.dpkg-*}"
+            else
+               rm -v ${OPT} "${file}"
+            fi
+         else
+            rm -v ${OPT} "${file}"
+         fi
+         echo
+      done
+   fi
+fi
+
+REMAINS=($(find /etc -name '*.dpkg-*'))
+if test -n "${REMAINS[0]}" ; then
+   echo "Remaining files:"
+   ls -l ${REMAINS[@]} ${REMAINS[@]%.dpkg-*}
+fi

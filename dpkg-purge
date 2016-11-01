@@ -1,0 +1,16 @@
+#! /bin/bash
+# -----------------------------------------------------------------------
+# Purge packages with status "removal candidate"
+# 
+# PUPPET CONTROLED: pmodule_server_base
+# -----------------------------------------------------------------------
+
+echo "Following packages are «removal candidates» :"
+/usr/bin/dpkg -l | awk '/^rc/'
+
+echo -n "Do you want to purge these? [y|n] : "
+read svar
+case $svar in 
+   y|Y) dpkg --purge $(COLUMNS=200 /usr/bin/dpkg -l | awk '/^rc/ {print $2}') ;;
+   *)    echo "Did nothing - exiting." ;;
+esac
