@@ -1,0 +1,59 @@
+#! /bin/bash
+# -----------------------------------------------------------------------
+# List out packages that comes from repo matching argument
+# 
+# PUPPET CONTROLED: pmodule_server_base
+# -----------------------------------------------------------------------
+
+usage() {
+  echo "
+Usage:
+    ${0##*/} [-v] <pattern> [<pattern> ...]
+
+    where <pattern> is a match against a repo (URL, path, whatever)
+    -v reverses the pattern matching.
+
+Warning:
+
+    This script, though very useful, is rather rudimentary!!!!
+
+    Before using it as a source for removing packages, make sure to _check_ the
+    output for possible false positives, and feel free to improve this script.
+
+Examples:
+    List out all packages from any uninett.no repo:
+    $ apt-origin uninett.no
+
+    List out all packages uninett.no or puppetlabs.com
+    $ apt-origin uninett.no puppetlabs.com
+
+    List out all packages neither from debian.org nor uninett.no
+    $ apt-origin -v uninett.no debian.org
+
+    List out all packages from any repo named jessie/mp
+    $ apt-origin jessie/mp
+
+    List out all packages from backports
+    $ apt-origin backports
+
+    List out all packages from that do not have default \"priority\" of 500
+    $ apt-origin -v 500
+"
+  exit 1
+}
+
+test -z "${1}" && usage
+
+for repo in ${*} ; do
+  case $repo in
+    -v) test "${MATCHLINE:0:2}" = "-v" || MATCHLINE="-v ${MATCHLINE}" ;;
+    -*) usage ;;
+    *) MATCHLINE="${MATCHLINE} -e $repo" ;;
+  esac
+done
+
+COLUMNS=400 /usr/bin/dpkg -l | awk '/^ii/ {print $2}' | while read pkg
+do
+  /usr/bin/apt-cache policy $pkg |
+	grep -A1 '^ \*\*\*' | tail -n 1 | grep -q ${MATCHLINE} && echo $pkg
+done
