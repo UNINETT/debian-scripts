@@ -8,5 +8,5 @@
 COLUMNS=400 /usr/bin/dpkg -l | awk '/^ii/ {print $2}' | while read pkg
 do
   /usr/bin/apt-cache policy $pkg |
-	grep -A1 '^ \*\*\*' | grep -q '100 /var/lib/dpkg/status' && echo $pkg
+	grep -A1 '^ \*\*\*' | grep -q '/var/lib/dpkg/status' && echo $pkg
 done
