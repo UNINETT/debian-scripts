@@ -7,5 +7,5 @@
 
 COLUMNS=400 /usr/bin/dpkg -l | awk '/^ii/ {print $2}' | while read pkg
 do
-  /usr/bin/apt-cache policy $pkg | grep -q -e http:// -e ftp:// || echo $pkg
+  /usr/bin/apt-cache policy $pkg | grep -q -e https:// -e http:// -e ftp:// || echo $pkg
 done
