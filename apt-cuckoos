@@ -1,6 +1,6 @@
 #! /bin/bash
 # -----------------------------------------------------------------------
-# List out packages that have no source in apt
+# List out installed packages that have no origin source in apt
 # 
 # PUPPET CONTROLED: pmodule_server_base
 # -----------------------------------------------------------------------
